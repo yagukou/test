@@ -285,7 +285,6 @@ body.translated-ltr .logo-sub {
 
     header{
       position:fixed;
-      top:0;
       left:0;
       width:100%;
       background:rgba(255,255,255,0.95);
@@ -293,13 +292,6 @@ body.translated-ltr .logo-sub {
       z-index:1000;
       border-bottom:1px solid #e5e5e5;
       margin:0;
-    }
-
-    .header-inner{
-      height:75px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
     }
 
     .logo{
@@ -324,15 +316,6 @@ body.translated-ltr .logo-sub {
       color:#8b1e3f;
     }
 
-    .header-btn{
-      background:#111;
-      color:white;
-      padding:12px 22px;
-      border-radius:999px;
-      font-weight:700;
-      transition:.3s;
-    }
-
     .header-btn:hover{
       background:#8b1e3f;
     }
@@ -353,7 +336,7 @@ body.translated-ltr .logo-sub {
       color:white;
       padding-top:100px;
       padding:0;
-      padding-bottom:0;/
+      padding-bottom:0;
     }
 
     .hero-content{
@@ -782,14 +765,7 @@ function removeGoogleUI() {
 setInterval(removeGoogleUI, 300);
 </script>
 
-  </body>
 
-</html>
-
-  <header>
-    <div class="container header-inner">
-
-      <nav>
         <a href="#">サービス</a>
         <a href="#">料金</a>
         <a href="#">折込情報</a>
