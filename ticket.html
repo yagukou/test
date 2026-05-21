@@ -281,6 +281,134 @@ body.translated-ltr .logo-sub {
   font-size: 16px;
 }
 
+.ticket-page {
+  background: #0d0d0d;
+  padding: 120px 8%;
+  min-height: 100vh;
+}
+
+.ticket-title {
+  text-align: center;
+  font-size: 70px;
+  letter-spacing: 8px;
+  color: white;
+  margin-bottom: 10px;
+
+  font-family: "Times New Roman", serif;
+}
+
+.ticket-sub {
+  text-align: center;
+  color: #d4af37;
+  letter-spacing: 3px;
+  margin-bottom: 70px;
+}
+
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
+}
+
+.ticket-card {
+  background: #151515;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  transition: 0.4s;
+
+  position: relative;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.ticket-card:hover {
+  transform: translateY(-10px);
+}
+
+.ticket-image {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+}
+
+.ticket-content {
+  padding: 30px;
+}
+
+.ticket-category {
+  color: #d4af37;
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.ticket-card h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: white;
+
+  font-family: serif;
+}
+
+.ticket-date {
+  color: #ccc;
+  margin-bottom: 30px;
+}
+
+.ticket-btn {
+  display: inline-block;
+
+  padding: 14px 28px;
+
+  border: 1px solid #d4af37;
+
+  color: #d4af37;
+
+  text-decoration: none;
+
+  transition: 0.3s;
+}
+
+.ticket-btn:hover {
+  background: #d4af37;
+  color: black;
+}
+
+.ticket-status {
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  background: #b90e0e;
+
+  padding: 8px 16px;
+
+  font-size: 12px;
+  letter-spacing: 1px;
+
+  z-index: 2;
+}
+
+.ticket-status.sold {
+  background: #666;
+}
+
+@media (max-width: 768px) {
+
+  .ticket-title {
+    font-size: 42px;
+  }
+
+  .ticket-image {
+    height: 300px;
+  }
+
+}
+
 @media (max-width: 768px) {
 
   header {
@@ -421,6 +549,82 @@ function googleTranslateElementInit() {
   ☰
   </div>
 </header>
+
+<section class="ticket-page">
+
+  <h1 class="ticket-title">
+    TICKET
+  </h1>
+
+  <p class="ticket-sub">
+    チケット購入
+  </p>
+
+  <div class="ticket-grid">
+
+    <!-- 公演カード -->
+    <div class="ticket-card">
+
+      <div class="ticket-status">
+        NOW ON SALE
+      </div>
+
+      <img src="play1.jpg" class="ticket-image">
+
+      <div class="ticket-content">
+
+        <div class="ticket-category">
+          早稲田大学
+        </div>
+
+        <h2>
+          『ロミオとジュリエット』
+        </h2>
+
+        <p class="ticket-date">
+          2026.08.14 - 08.16
+        </p>
+
+        <a href="#" class="ticket-btn">
+          チケット購入
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 公演カード -->
+    <div class="ticket-card">
+
+      <div class="ticket-status sold">
+        SOLD OUT
+      </div>
+
+      <img src="play2.jpg" class="ticket-image">
+
+      <div class="ticket-content">
+
+        <div class="ticket-category">
+          慶應義塾大学
+        </div>
+
+        <h2>
+          『ハムレット』
+        </h2>
+
+        <p class="ticket-date">
+          2026.08.20 - 08.22
+        </p>
+
+        <a href="#" class="ticket-btn">
+          詳細を見る
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+</section>
 
 <script>
 function removeGoogleUI() {
