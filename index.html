@@ -268,6 +268,84 @@ body.translated-ltr .logo-sub {
   margin-top: 10px;
 }
 
+.slider {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+}
+
+.slide {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+}
+
+.hero-text {
+  position: absolute;
+
+  bottom: 12%;
+  left: 8%;
+
+  z-index: 10;
+
+  color: white;
+}
+
+.hero-text h1 {
+  font-size: 72px;
+  font-family: serif;
+}
+
+.hero-text p {
+  letter-spacing: 4px;
+  color: #d4af37;
+}
+
+.slider::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+  linear-gradient(
+    to top,
+    rgba(0,0,0,0.8),
+    rgba(0,0,0,0.15)
+  );
+
+  z-index: 2;
+}
+
+.sns-area {
+  position: absolute;
+
+  bottom: 40px;
+  right: 60px;
+
+  display: flex;
+  gap: 25px;
+
+  z-index: 20;
+}
+
+.top-news {
+  display: flex;
+
+  background: white;
+  color: black;
+
+  padding: 20px 8%;
+}
+
+.news-label {
+  color: #b90e0e;
+
+  margin-right: 30px;
+
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
 
   header {
@@ -444,6 +522,24 @@ window.difyChatbotConfig = {
   ☰
   </div>
 </header>
+
+
+<div class="hero-text">
+  <p>Waseda–Keio Theatre Festival</p>
+  <h1>早慶演劇祭2026</h1>
+</div>
+
+<section class="top-news">
+
+  <div class="news-label">
+    NEWS
+  </div>
+
+  <div class="news-text">
+    2026.08.10　チケット販売開始
+  </div>
+
+</section>
 
 <script>
 function removeGoogleUI() {
