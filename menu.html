@@ -441,31 +441,6 @@ function googleTranslateElementInit() {
   </div>
 </header>
 
-<script>
-function removeGoogleUI() {
-  // バナー
-  document.querySelectorAll('.goog-te-banner-frame').forEach(el => el.remove());
-
-  // ポップアップ（翻訳されました表示）
-  document.querySelectorAll('.goog-te-balloon-frame').forEach(el => el.remove());
-
-  // その他UI
-  document.querySelectorAll('.skiptranslate').forEach(el => {
-    if (el.innerText.includes("翻訳")) el.remove();
-  });
-
-  // 位置ズレ修正
-  document.body.style.top = '0px';
-}
-
-/* ずっと監視して消す */
-setInterval(removeGoogleUI, 300);
-</script>
-
-  </body>
-
-</html>
-
 <div id="mega-menu" class="mega-menu">
 
   <div class="mega-content">
@@ -498,6 +473,31 @@ setInterval(removeGoogleUI, 300);
 
   </div>
 </div>
+
+<script>
+function removeGoogleUI() {
+  // バナー
+  document.querySelectorAll('.goog-te-banner-frame').forEach(el => el.remove());
+
+  // ポップアップ（翻訳されました表示）
+  document.querySelectorAll('.goog-te-balloon-frame').forEach(el => el.remove());
+
+  // その他UI
+  document.querySelectorAll('.skiptranslate').forEach(el => {
+    if (el.innerText.includes("翻訳")) el.remove();
+  });
+
+  // 位置ズレ修正
+  document.body.style.top = '0px';
+}
+
+/* ずっと監視して消す */
+setInterval(removeGoogleUI, 300);
+</script>
+
+  </body>
+
+</html>
 
 <script>
 function toggleMenu() {
