@@ -87,6 +87,36 @@
 
 </style>
 
+<script type="module">
+
+async function registerPerformance(performanceData) {
+
+  try {
+
+    const docRef = await addDoc(
+      collection(db, "performances"),
+      {
+        ...performanceData,
+        created_at: serverTimestamp()
+      }
+    );
+
+    console.log(
+      "Document written with ID:",
+      docRef.id
+    );
+
+  } catch (e) {
+
+    console.error(
+      "Error adding document:",
+      e
+    );
+
+  }
+
+}
+
 <section class="register-section">
 
   <div class="register-box">
@@ -121,17 +151,62 @@
 
   </div>
 
-</section>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<script>
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCsYGkjbE1_6j0b560JhGcxxSH0wdXkP24",
+  authDomain: "soukeiengekisai.firebaseapp.com",
+  projectId: "soukeiengekisai",
+  storageBucket: "soukeiengekisai.firebasestorage.app",
+  messagingSenderId: "421329522934",
+  appId: "1:421329522934:web:5011ab66c01335f12a5cd7",
+  measurementId: "G-THFPJGJJ87"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 document
 .getElementById("registerForm")
-.addEventListener("submit",function(e){
+.addEventListener("submit", async function(e){
 
   e.preventDefault();
 
-  alert("公演を登録しました");
+  const performanceData = {
+
+    title: document.getElementById("title").value,
+    group: document.getElementById("group").value,
+    date: document.getElementById("date").value,
+    place: document.getElementById("place").value,
+    description: document.getElementById("description").value,
+
+    created_at: serverTimestamp()
+
+  };
+
+  try {
+
+    alert("公演登録完了");
+
+    this.reset();
+
+  } catch(error) {
+
+    console.error(error);
+
+    alert("登録失敗");
+
+  }
 
 });
+
 </script>
 
+</section>
