@@ -87,36 +87,6 @@
 
 </style>
 
-<script type="module">
-
-async function registerPerformance(performanceData) {
-
-  try {
-
-    const docRef = await addDoc(
-      collection(db, "performances"),
-      {
-        ...performanceData,
-        created_at: serverTimestamp()
-      }
-    );
-
-    console.log(
-      "Document written with ID:",
-      docRef.id
-    );
-
-  } catch (e) {
-
-    console.error(
-      "Error adding document:",
-      e
-    );
-
-  }
-
-}
-
 <section class="register-section">
 
   <div class="register-box">
@@ -151,14 +121,20 @@ async function registerPerformance(performanceData) {
 
   </div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+</section>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getFirestore,
   collection,
   addDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCsYGkjbE1_6j0b560JhGcxxSH0wdXkP24",
@@ -175,29 +151,29 @@ const db = getFirestore(app);
 
 document
 .getElementById("registerForm")
-.addEventListener("submit", async function(e){
+.addEventListener("submit", async (e)=>{
 
   e.preventDefault();
 
-  const performanceData = {
-
-    title: document.getElementById("title").value,
-    group: document.getElementById("group").value,
-    date: document.getElementById("date").value,
-    place: document.getElementById("place").value,
-    description: document.getElementById("description").value,
-
-    created_at: serverTimestamp()
-
-  };
-
   try {
+
+    await addDoc(
+      collection(db,"performances"),
+      {
+        title: document.getElementById("title").value,
+        group: document.getElementById("group").value,
+        date: document.getElementById("date").value,
+        place: document.getElementById("place").value,
+        description: document.getElementById("description").value,
+        created_at: serverTimestamp()
+      }
+    );
 
     alert("公演登録完了");
 
-    this.reset();
+    document.getElementById("registerForm").reset();
 
-  } catch(error) {
+  } catch(error){
 
     console.error(error);
 
@@ -208,5 +184,3 @@ document
 });
 
 </script>
-
-</section>
