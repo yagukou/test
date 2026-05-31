@@ -1,64 +1,83 @@
-<div class="company-grid" id="companyGrid"></div>
-
-<script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  getDocs
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-
-  apiKey:"AIza...",
-  authDomain:"soukeiengekisai.firebaseapp.com",
-  projectId:"soukeiengekisai",
-  storageBucket:"soukeiengekisai.firebasestorage.app",
-  messagingSenderId:"421329522934",
-  appId:"1:421329522934:web:5011ab66c01335f12a5cd7"
-
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-async function loadTheatres(){
-
-  const grid =
-    document.getElementById("companyGrid");
-
-  const snapshot =
-    await getDocs(collection(db,"theatres"));
-
-  grid.innerHTML = "";
-
-  snapshot.forEach(doc=>{
-
-    const data = doc.data();
-
-    grid.innerHTML += `
-      <div class="company-card">
-
-        <h3>${data.name}</h3>
-
-        <p>${data.university}</p>
-
-        <p>
-          次回公演：
-          ${data.nextShow}
-        </p>
-
-      </div>
-    `;
-
-  });
-
+<style>
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
 }
 
-loadTheatres();
+.stat-card{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  border:1px solid #eee;
+}
 
-</script>
+.request-card{
+  background:white;
+  border-radius:20px;
+  padding:30px;
+  margin-bottom:20px;
+  border-left:5px solid #b90e0e;
+}
+
+.accept-btn{
+  background:#dff5ef;
+  color:#008060;
+}
+
+.reject-btn{
+  background:#ffe0e0;
+  color:#c00;
+}
+
+</style>
+
+<div class="dashboard">
+
+  <div class="stat-card">
+    <p>未読の折り込み依頼</p>
+    <h2>2件</h2>
+  </div>
+
+  <div class="stat-card">
+    <p>登録中の公演</p>
+    <h2>2件</h2>
+  </div>
+
+  <div class="stat-card">
+    <p>送信した依頼</p>
+    <h2>3件</h2>
+  </div>
+
+  <div class="stat-card">
+    <p>承諾済み折り込み</p>
+    <h2>2件</h2>
+  </div>
+
+</div>
+
+<h2>受信した折り込み依頼</h2>
+
+<div class="request-card">
+
+  <h3>
+    劇団ソウル「春の嵐、それから」
+  </h3>
+
+  <p>
+    光と影の間で への折り込み依頼
+  </p>
+
+  <p>
+    100部 / 郵送
+  </p>
+
+  <button class="accept-btn">
+    承諾
+  </button>
+
+  <button class="reject-btn">
+    辞退
+  </button>
+
+</div>
