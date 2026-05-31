@@ -626,13 +626,7 @@ const monthTitle = document.getElementById("monthTitle");
 let currentMonth = 7;
 let currentYear = 2026;
 
-const events = {
-  "2026-8-10": ["開幕公演『光と影』"],
-  "2026-8-12": ["慶應義塾大学公演"],
-  "2026-8-15": ["早稲田演劇研究会"],
-  "2026-8-18": ["特別シンポジウム"],
-  "2026-8-22": ["学生交流イベント"]
-};
+const events = {};
 
 function renderCalendar(year, month){
 
@@ -658,7 +652,8 @@ function renderCalendar(year, month){
 
   for(let d=1; d<=lastDate; d++){
 
-    const key = `${year}-${month+1}-${d}`;
+    const key =
+`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 
     let eventHTML = "";
 
@@ -793,36 +788,48 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
   collection,
-  addDoc
+  getDocs
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
+  apiKey: "AIzaSyCsYGkjbE1_6j0b560JhGcxxSH0wdXkP24",
+  authDomain: "soukeiengekisai.firebaseapp.com",
+  projectId: "soukeiengekisai",
+  storageBucket: "soukeiengekisai.firebasestorage.app",
+  messagingSenderId: "421329522934",
+  appId: "1:421329522934:web:5011ab66c01335f12a5cd7"
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
 
-async function addPerformance(){
+const events = {};
 
-  await addDoc(
-    collection(db,"performances"),
-    {
-      title:"開幕公演",
-      date:"2026-08-10",
-      place:"大隈講堂"
+async function loadPerformances(){
+
+  const snapshot =
+    await getDocs(collection(db,"performances"));
+
+  snapshot.forEach(doc=>{
+
+    const data = doc.data();
+
+    const date = data.date;
+
+    if(!events[date]){
+      events[date] = [];
     }
-  );
 
-  alert("保存完了");
+    events[date].push(data.title);
+
+  });
+
+  renderCalendar(currentYear,currentMonth);
+
 }
+
+loadPerformances();
 
 </script>
 
