@@ -368,15 +368,20 @@ header{
 }
 
 .calendar-grid{
+
   display:grid;
   grid-template-columns:repeat(7,1fr);
 
   background:white;
 
-  border-radius:24px;
+  border-radius:20px;
+
   overflow:hidden;
 
-  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  border:1px solid #ddd;
+
+  box-shadow:
+  0 8px 25px rgba(0,0,0,0.08);
 }
 
 .day-name{
@@ -441,6 +446,69 @@ header{
   background:#f8f8f8;
 }
 
+.calendar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  margin-bottom:40px;
+}
+
+.calendar-title h2{
+  font-size:42px;
+  margin:0;
+  color:#111;
+}
+
+.calendar-title p{
+  color:#666;
+  margin-top:10px;
+}
+
+.register-btn{
+  background:#b90e0e;
+  color:white;
+
+  text-decoration:none;
+
+  padding:15px 30px;
+  border-radius:12px;
+}
+
+.modal{
+
+ display:none;
+
+ position:fixed;
+ inset:0;
+
+ background:rgba(0,0,0,0.7);
+
+ z-index:9999;
+}
+
+.modal-content{
+
+ background:white;
+
+ width:700px;
+ max-width:90%;
+
+ margin:100px auto;
+
+ padding:40px;
+
+ border-radius:20px;
+
+ color:black;
+}
+
+.close{
+ float:right;
+ cursor:pointer;
+ font-size:30px;
+}
+
 @media(max-width:768px){
 
   .calendar-head h2{
@@ -498,29 +566,27 @@ header{
   </div>
 
   <div class="header-menu">
-    <a href="#">公演一覧</a>
     <a href="#">カレンダー</a>
-    <a href="#">ニュース</a>
+    <a href="#">劇団一覧</a>
+    <a href="#">マイページ</a>
+    <a href="#">公演登録</a>
     <a href="#">ログイン</a>
   </div>
 
 </header>
 
-<!-- HERO -->
+<div class="calendar-header">
 
-<section class="hero">
-
-  <div class="hero-text">
-
-    <p>Waseda–Keio Theatre Festival</p>
-
-    <h1>
-      公演スケジュール
-    </h1>
-
+  <div class="calendar-title">
+    <h2>公演カレンダー</h2>
+    <p>公演日程とイベント情報を確認できます</p>
   </div>
 
-</section>
+  <a href="#" class="register-btn">
+    公演登録
+  </a>
+
+</div>
 
 <!-- CALENDAR -->
 
@@ -616,6 +682,18 @@ function renderCalendar(year, month){
 
 renderCalendar(currentYear,currentMonth);
 
+function showPerformance(title){
+
+ document.getElementById("modalTitle").innerText = title;
+
+ document.getElementById("performanceModal").style.display = "block";
+}
+
+document.querySelector(".close").onclick = ()=>{
+
+ document.getElementById("performanceModal").style.display = "none";
+}
+
 document.getElementById("prevMonth").onclick = ()=>{
 
   currentMonth--;
@@ -641,6 +719,38 @@ document.getElementById("nextMonth").onclick = ()=>{
 };
 
 </script>
+
+eventHTML += `
+<div
+ class="event"
+ onclick="showPerformance('${ev}')">
+
+ ${ev}
+
+</div>
+`;
+
+<div id="performanceModal" class="modal">
+
+  <div class="modal-content">
+
+    <span class="close">&times;</span>
+
+    <h2 id="modalTitle"></h2>
+
+    <p>会場：早稲田大学大隈講堂</p>
+
+    <p>期間：2026.08.10〜08.12</p>
+
+    <p>主催：早慶演劇祭実行委員会</p>
+
+    <button>
+      詳細を見る
+    </button>
+
+  </div>
+
+</div>
 
 </body>
 </html>
