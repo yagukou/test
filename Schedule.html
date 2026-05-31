@@ -626,8 +626,6 @@ const monthTitle = document.getElementById("monthTitle");
 let currentMonth = 7;
 let currentYear = 2026;
 
-const events = {};
-
 function renderCalendar(year, month){
 
   calendar.innerHTML = "";
@@ -723,16 +721,6 @@ document.getElementById("nextMonth").onclick = ()=>{
 
 </script>
 
-eventHTML += `
-<div
- class="event"
- onclick="showPerformance('${ev}')">
-
- ${ev}
-
-</div>
-`;
-
 <div id="performanceModal" class="modal">
 
   <div class="modal-content">
@@ -788,8 +776,8 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
   collection,
-  addDoc
-  getDocs
+  addDoc,
+  getDocs,
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
