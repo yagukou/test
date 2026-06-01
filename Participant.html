@@ -1053,7 +1053,7 @@ function submitRequestForm() {
   const templateParams = {
     to_email: targetTroupe.email,
     from_name: fromName,
-    from_email: fromEmail,
+    reply_to: fromEmail,
     copies: copies,
     size: size,
     notes: notes || '特になし'
