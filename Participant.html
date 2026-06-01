@@ -595,7 +595,7 @@ function goBack() {
 }
 
 // ==========================================
-// 3. アカウント管理 & 自動仕分けログイン
+// 3. アカウント管理（劇団ごとに完全分離）
 // ==========================================
 function handleRegisterAccount() {
   const name = document.getElementById('reg-troupe-name').value;
@@ -608,25 +608,29 @@ function handleRegisterAccount() {
   const colors = ['troupe-a', 'troupe-b', 'troupe-c', 'troupe-d', 'troupe-e'];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
+  // 新しい劇団アカウントを生成
   const newTroupe = {
     id: 'troupe-' + Date.now(), name, univ, est: '2026年', count: '0公演', accept: true,
     tags: ['新規'], cls: randomColor, statusText: '折り込み受付中', statusCls: 'status-open', email
   };
 
   troupesData.push(newTroupe);
-  currentUser = newTroupe;
+  currentUser = newTroupe; // ★ここ：作成したアカウントで即時自動ログイン
   saveAllData();
   
-  alert(`劇団「${name}」のアカウントを作成しました！`);
+  alert(`劇団「${name}」のアカウントを作成しました！マイページに移動します。`);
+  
+  // セレクトボックスや凡例の表示を更新して、マイページを表示
   updateFilterDropdown();
   renderLegend();
-  showPage('mypage');
+  showPage('mypage'); 
 }
 
 function handleLogin() {
   const email = document.getElementById('login-email').value;
   if (!email) { alert('メールアドレスを入力してください'); return; }
 
+  // ★ここを修正：入力されたメールアドレスと一致する劇団を探す（ソウル固定を撤廃）
   const found = troupesData.find(t => t.email === email);
   if (found) {
     currentUser = found;
@@ -664,7 +668,7 @@ function updateAuthUI() {
   }
 }
 
-// ★最重要：自分宛ての折込依頼だけをフィルタリングしてダッシュボードに表示！
+// ログインしている劇団宛ての折込依頼だけを表示する仕分け処理
 function renderDashboardInbox() {
   const container = document.getElementById('dashboard-inbox');
   if (!container) return;
@@ -672,6 +676,7 @@ function renderDashboardInbox() {
 
   if (!currentUser) return;
 
+  // 自分の劇団ID（currentUser.id）宛てに届いた保留中の依頼のみをフィルタリング
   const myRequests = incomingRequests.filter(r => r.toTroupeId === currentUser.id && r.status === 'pending');
   document.getElementById('stat-incoming-count').innerText = `${myRequests.length} 件`;
 
@@ -841,7 +846,7 @@ function filterTroupes() {
 }
 
 // ==========================================
-// 5. 公演登録（ログインしている団体に紐付け）
+// 5. 公演登録
 // ==========================================
 function updateRegisterFormUI() {
   const form = document.getElementById('register-form-body');
@@ -865,7 +870,6 @@ function handleRegisterPerformance() {
 
   if (!title || !venue) { alert('タイトルと会場名は必須です！'); return; }
 
-  // ログイン中団体のIDをセットして保存
   performancesData.push({ id: Date.now(), troupeId: currentUser.id, title, dateStart: start, dateEnd: end, venue, desc });
   saveAllData();
 
@@ -878,7 +882,7 @@ function handleRegisterPerformance() {
 }
 
 // ==========================================
-// 6. 本物の折り込み依頼送信 (EmailJS自動宛先切り替え)
+// 6. 本物の折り込み依頼送信
 // ==========================================
 function updateRequestFormUI() {
   const perf = performancesData.find(p => p.id === selectedPerfId);
@@ -898,7 +902,7 @@ function updateRequestFormUI() {
 function submitRequestForm() {
   const perf = performancesData.find(p => p.id === selectedPerfId);
   if (!perf) return;
-  const targetTroupe = troupesData.find(t => t.id === perf.troupeId); // 申し込み先の劇団
+  const targetTroupe = troupesData.find(t => t.id === perf.troupeId); 
 
   const fromName = document.getElementById('req-from-name').value;
   const fromEmail = document.getElementById('req-from-email').value;
@@ -908,7 +912,7 @@ function submitRequestForm() {
 
   if (!fromName || !fromEmail || !copies) { alert('必須項目を入力してください。'); return; }
 
-  // 1. データとして保存（宛先団体IDをしっかり紐付け）
+  // 申し込み先の劇団IDをしっかり紐付けて保存
   incomingRequests.push({
     id: Date.now(),
     toTroupeId: targetTroupe.id,
@@ -920,9 +924,8 @@ function submitRequestForm() {
   });
   saveAllData();
 
-  // 2. EmailJSにデータを渡して本物のメールを自動宛先振り分け送信
   const templateParams = {
-    to_email: targetTroupe.email,      // ★相手劇団が登録した本物のメアドをここに代入！
+    to_email: targetTroupe.email,      
     from_name: fromName,
     from_email: fromEmail,
     copies: copies,
@@ -930,7 +933,6 @@ function submitRequestForm() {
     notes: notes || '特になし'
   };
 
-  // ※ あらかじめ登録されているService IDとTemplate IDを使います
   emailjs.send('service_4gfx3qf', 'template_rzattmh', templateParams)
     .then(function(response) {
        console.log('SUCCESS!', response.status, response.text);
@@ -940,7 +942,6 @@ function submitRequestForm() {
        alert('EmailJSの送信に失敗しました。Keyの設定などを再度確認してください。');
     });
 
-  // アニメーション
   const banner = document.getElementById('success-banner');
   const formBody = document.getElementById('request-form-body');
   if (banner) banner.classList.add('show');
@@ -961,5 +962,3 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAuthUI();
 });
 </script>
-</body>
-</html>
