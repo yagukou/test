@@ -662,7 +662,74 @@ function goBack() {
 // ==========================================
 // 3. アカウント管理
 // ==========================================
-// 📝 新規劇団アカウント作成
+// ==========================================
+// 🔐 認証・ログイン状態の管理ロジック（決定版）
+// ==========================================
+
+// 1. ログイン中のユーザー情報をローカルストレージから取得
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+// 2. 画面の表示をログイン状態に合わせて自動で切り替える関数
+function updateAuthUI() {
+  const loginBtn = document.getElementById('nav-login-btn');
+  const needLoginMsg = document.getElementById('register-need-login-msg');
+  const registerForm = document.getElementById('register-form-body');
+  const authSection = document.getElementById('auth-section');
+  const dashboardSection = document.getElementById('dashboard-section');
+  const welcomeMessage = document.getElementById('welcome-message');
+
+  if (currentUser) {
+    // 🔓 ログインしている時：管理画面やフォームを表示
+    if (loginBtn) loginBtn.innerHTML = `<i class="ti ti-user"></i>${currentUser.name}`;
+    if (needLoginMsg) needLoginMsg.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'block';
+    if (authSection) authSection.style.display = 'none';
+    if (dashboardSection) dashboardSection.style.display = 'block';
+    if (welcomeMessage) welcomeMessage.textContent = `🎉 おかえりなさい、${currentUser.name} さん`;
+  } else {
+    // 🔒 ログインしていない時：ログイン・アカウント作成画面を表示
+    if (loginBtn) loginBtn.innerHTML = `<i class="ti ti-user"></i>ログイン`;
+    if (needLoginMsg) needLoginMsg.style.display = 'block';
+    if (registerForm) registerForm.style.display = 'none';
+    if (authSection) authSection.style.display = 'block';
+    if (dashboardSection) dashboardSection.style.display = 'none';
+  }
+}
+
+// 3. ログイン処理
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!email || !password) {
+    alert('❌ メールアドレスとパスワードを入力してください。');
+    return;
+  }
+
+  const troupes = JSON.parse(localStorage.getItem('troupes')) || [];
+  const troupe = troupes.find(t => t.email === email);
+
+  if (!troupe) {
+    alert('❌ 登録されていないメールアドレスです。');
+    return;
+  }
+
+  // パスワードの完全一致チェック
+  if (password !== troupe.password) {
+    alert('❌ パスワードが間違っています。');
+    return;
+  }
+
+  // ログイン成功情報を保存
+  currentUser = troupe;
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  
+  alert(`🔑 ${troupe.name} としてログインしました！`);
+  updateAuthUI();
+  location.reload(); // 画面をリロードしてカレンダー等に反映
+}
+
+// 4. 新規劇団アカウント作成
 function handleRegisterAccount() {
   const name = document.getElementById('reg-troupe-name').value.trim();
   const univ = document.getElementById('reg-troupe-univ').value;
@@ -676,69 +743,38 @@ function handleRegisterAccount() {
 
   let troupes = JSON.parse(localStorage.getItem('troupes')) || [];
   
-  // メールアドレスの重複チェック
   if (troupes.some(t => t.email === email)) {
     alert('❌ このメールアドレスは既に登録されています。');
     return;
   }
 
-  // 新しい劇団データ（パスワードも一緒に保存！）
   const newTroupe = {
     id: 'troupe_' + Date.now(),
     name: name,
     univ: univ,
     email: email,
-    password: password // ★ここが追加
+    password: password
   };
 
   troupes.push(newTroupe);
   localStorage.setItem('troupes', JSON.stringify(troupes));
   
-  alert(`✨ 劇団「${name}」のアカウントを作成しました！\n設定したパスワードでログインしてください。`);
-  
-  // 入力欄をクリアしてリロード
+  alert(`✨ 劇団「${name}」のアカウントを作成しました！\n作成したパスワードでログインしてください。`);
   location.reload();
 }
 
-// 🔐 ログイン処理
-function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-
-  if (!email || !password) {
-    alert('❌ メールアドレスとパスワードを入力してください。');
-    return;
-  }
-
-  // ローカルストレージから劇団一覧を取得
-  const troupes = JSON.parse(localStorage.getItem('troupes')) || [];
-  const troupe = troupes.find(t => t.email === email);
-
-  if (!troupe) {
-    alert('❌ 登録されていないメールアドレスです。');
-    return;
-  }
-
-  // 💡 シンプルに登録されたパスワードと一致するかチェック
-  if (password !== troupe.password) {
-    alert('❌ パスワードが間違っています。');
-    return;
-  }
-
-  // ログイン成功処理
-  currentUser = troupe;
-  localStorage.setItem('currentUser', JSON.stringify(currentUser));
-  
-  alert(`🔑 ${troupe.name} としてログインしました！`);
-  location.reload(); // 画面を更新
-}
-
+// 5. ログアウト処理
 function handleLogout() {
+  localStorage.removeItem('currentUser');
   currentUser = null;
-  saveAllData();
-  updateAuthUI();
-  alert('ログアウトしました。');
+  alert('🚪 ログアウトしました。');
+  location.reload();
 }
+
+// 6. ページが読み込まれた時に自動でUIを同期させる
+document.addEventListener('DOMContentLoaded', () => {
+  updateAuthUI();
+});
 
 function updateAuthUI() {
   const auth = document.getElementById('auth-section');
