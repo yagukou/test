@@ -520,7 +520,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
    (function(){
-      // ★ここにあなたのEmailJSの「Public Key」を貼り付けます！
+      // ユーザー様のPublic Keyを設定
       emailjs.init("G7zBiW5JvckByX5DB");
    })();
 </script>
@@ -595,7 +595,7 @@ function goBack() {
 }
 
 // ==========================================
-// 3. アカウント管理（劇団ごとに完全分離）
+// 3. アカウント管理
 // ==========================================
 function handleRegisterAccount() {
   const name = document.getElementById('reg-troupe-name').value;
@@ -608,19 +608,17 @@ function handleRegisterAccount() {
   const colors = ['troupe-a', 'troupe-b', 'troupe-c', 'troupe-d', 'troupe-e'];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-  // 新しい劇団アカウントを生成
   const newTroupe = {
     id: 'troupe-' + Date.now(), name, univ, est: '2026年', count: '0公演', accept: true,
     tags: ['新規'], cls: randomColor, statusText: '折り込み受付中', statusCls: 'status-open', email
   };
 
   troupesData.push(newTroupe);
-  currentUser = newTroupe; // ★ここ：作成したアカウントで即時自動ログイン
+  currentUser = newTroupe; 
   saveAllData();
   
   alert(`劇団「${name}」のアカウントを作成しました！マイページに移動します。`);
   
-  // セレクトボックスや凡例の表示を更新して、マイページを表示
   updateFilterDropdown();
   renderLegend();
   showPage('mypage'); 
@@ -630,7 +628,6 @@ function handleLogin() {
   const email = document.getElementById('login-email').value;
   if (!email) { alert('メールアドレスを入力してください'); return; }
 
-  // ★ここを修正：入力されたメールアドレスと一致する劇団を探す（ソウル固定を撤廃）
   const found = troupesData.find(t => t.email === email);
   if (found) {
     currentUser = found;
@@ -668,7 +665,6 @@ function updateAuthUI() {
   }
 }
 
-// ログインしている劇団宛ての折込依頼だけを表示する仕分け処理
 function renderDashboardInbox() {
   const container = document.getElementById('dashboard-inbox');
   if (!container) return;
@@ -676,7 +672,6 @@ function renderDashboardInbox() {
 
   if (!currentUser) return;
 
-  // 自分の劇団ID（currentUser.id）宛てに届いた保留中の依頼のみをフィルタリング
   const myRequests = incomingRequests.filter(r => r.toTroupeId === currentUser.id && r.status === 'pending');
   document.getElementById('stat-incoming-count').innerText = `${myRequests.length} 件`;
 
@@ -882,7 +877,7 @@ function handleRegisterPerformance() {
 }
 
 // ==========================================
-// 6. 本物の折り込み依頼送信
+// 6. 本物の折り込み依頼送信 (ご指定のIDに修正済み)
 // ==========================================
 function updateRequestFormUI() {
   const perf = performancesData.find(p => p.id === selectedPerfId);
@@ -912,7 +907,7 @@ function submitRequestForm() {
 
   if (!fromName || !fromEmail || !copies) { alert('必須項目を入力してください。'); return; }
 
-  // 申し込み先の劇団IDをしっかり紐付けて保存
+  // 内部データベースへの登録
   incomingRequests.push({
     id: Date.now(),
     toTroupeId: targetTroupe.id,
@@ -924,6 +919,7 @@ function submitRequestForm() {
   });
   saveAllData();
 
+  // メール送信用パラメータの組み立て
   const templateParams = {
     to_email: targetTroupe.email,      
     from_name: fromName,
@@ -933,15 +929,23 @@ function submitRequestForm() {
     notes: notes || '特になし'
   };
 
-  emailjs.send('service_4gfx3qf', 'template_rzattmh', templateParams)
+  // ユーザー様ご指定のService ID & Template IDをセット
+  const serviceID = 'service_4gfx3qf';  
+  const templateID = 'template_rzattmh'; 
+
+  // EmailJSでの送信実行
+  emailjs.send(serviceID, templateID, templateParams)
     .then(function(response) {
        console.log('SUCCESS!', response.status, response.text);
        alert(`【本物のメール送信成功！】\n相手劇団（${targetTroupe.name}）の登録アドレス「${targetTroupe.email}」へ通知を送信しました！`);
+       finalizeRequestFormSuccess();
     }, function(error) {
        console.log('FAILED...', error);
-       alert('EmailJSの送信に失敗しました。Keyの設定などを再度確認してください。');
+       alert('EmailJSの送信に失敗しました。キーやテンプレート変数の設定をご確認ください。 \nエラー内容: ' + JSON.stringify(error));
     });
+}
 
+function finalizeRequestFormSuccess() {
   const banner = document.getElementById('success-banner');
   const formBody = document.getElementById('request-form-body');
   if (banner) banner.classList.add('show');
@@ -962,3 +966,5 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAuthUI();
 });
 </script>
+</body>
+</html>
