@@ -182,9 +182,10 @@
     .sidebar-card { background: var(--white); border: 0.5px solid var(--border-neutral); border-radius: var(--radius-lg); padding: 1.25rem; }
     .sidebar-card-title { font-size: 13px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
     .quota-bar-bg { background: var(--surface2); height: 8px; border-radius: 4px; overflow: hidden; }
-    .quota-bar-fill { background: var(--crimson); height: 100%; }
+    .quota-bar-fill { background: var(--crimson); height: 100%; transition: width 0.3s ease; }
     .quota-text { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .request-btn { width: 100%; padding: 11px; background: var(--crimson); color: #fff; border: none; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .request-btn:disabled { background: var(--muted); cursor: not-allowed; }
 
     /* ===================== FORMS ===================== */
     .form-card { background: var(--white); border: 0.5px solid var(--border-neutral); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 680px; }
@@ -315,7 +316,7 @@
             <div class="perf-troupe-link" id="detail-troupe-name" onclick="showPage('troupes')"></div>
             <div class="perf-title" id="detail-title"></div>
           </div>
-          <div class="status-badge status-open">折り込み受付中</div>
+          <div class="status-badge" id="detail-status-badge">折り込み受付中</div>
         </div>
         <p class="perf-desc" id="detail-desc"></p>
         <hr class="divider">
@@ -341,13 +342,13 @@
       <div class="perf-sidebar">
         <div class="sidebar-card">
           <div class="sidebar-card-title"><i class="ti ti-stack-2"></i>折り込み枠の状況</div>
-          <div class="quota-text">受付可能部数</div>
-          <div style="font-size:22px;font-weight:500;color:var(--ink)">300<span style="font-size:14px;font-weight:400;color:var(--muted)"> 部</span></div>
+          <div class="quota-text">受付合計上限</div>
+          <div style="font-size:22px;font-weight:500;color:var(--ink)" id="detail-max-quota">300<span style="font-size:14px;font-weight:400;color:var(--muted)"> 部</span></div>
           <div style="margin:8px 0">
-            <div class="quota-bar-bg"><div class="quota-bar-fill" style="width:42%"></div></div>
+            <div class="quota-bar-bg"><div class="quota-bar-fill" id="detail-quota-bar" style="width:0%"></div></div>
           </div>
-          <div class="quota-text">126/300部 使用済み</div>
-          <button class="request-btn" onclick="showPage('request-form')">
+          <div class="quota-text" id="detail-quota-summary">0 / 300部 使用済み</div>
+          <button class="request-btn" id="detail-request-btn" onclick="showPage('request-form')">
             <i class="ti ti-send"></i>折り込みを依頼する
           </button>
         </div>
@@ -381,7 +382,7 @@
         <div class="form-2col">
           <div class="form-row">
             <label class="form-label">希望折り込み部数<span class="form-required">*</span></label>
-            <input type="number" class="form-input" id="req-copies" value="100" min="1" max="300">
+            <input type="number" class="form-input" id="req-copies" value="100" min="1" max="500">
           </div>
           <div class="form-row">
             <label class="form-label">ビラのサイズ・形状<span class="form-required">*</span></label>
@@ -429,9 +430,15 @@
             <input type="date" class="form-input" id="new-perf-end" value="2026-06-22">
           </div>
         </div>
-        <div class="form-row">
-          <label class="form-label">会場名<span class="form-required">*</span></label>
-          <input type="text" class="form-input" id="new-perf-venue" placeholder="例：早稲田大学小劇場どらま館">
+        <div class="form-2col">
+          <div class="form-row">
+            <label class="form-label">会場名<span class="form-required">*</span></label>
+            <input type="text" class="form-input" id="new-perf-venue" placeholder="例：早稲田大学小劇場どらま館">
+          </div>
+          <div class="form-row">
+            <label class="form-label">折り込み受付上限部数<span class="form-required">*</span></label>
+            <input type="number" class="form-input" id="new-perf-quota" value="300" min="10" max="1000">
+          </div>
         </div>
         <div class="form-row">
           <label class="form-label">公演概要・詳細説明</label>
@@ -495,8 +502,8 @@
           <div class="stat-value" id="stat-incoming-count">0 件</div>
         </div>
         <div class="stat-card stat-card-neutral">
-          <div class="stat-label">現在の枠使用率</div>
-          <div class="stat-value">42%</div>
+          <div class="stat-label">現在の総依頼枠数</div>
+          <div class="stat-value" id="stat-total-requested">0 部</div>
         </div>
       </div>
       <div class="section-title"><i class="ti ti-mail-opened"></i>自劇団宛ての折り込み依頼一覧（承認 / 拒否）</div>
@@ -520,7 +527,6 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
    (function(){
-      // ユーザー様のPublic Keyを設定
       emailjs.init("G7zBiW5JvckByX5DB");
    })();
 </script>
@@ -537,26 +543,28 @@ const DEFAULT_TROUPES = [
   { id: 'e', name: 'パラドックス', univ: '早稲田大学', est: '2021年', count: '6公演', accept: true, tags: ['コメディ'], cls: 'troupe-e', statusText: '折り込み受付中', statusCls: 'status-open', email: 'paradox@example.com' }
 ];
 
+// 💡 maxQuota（上限枠数）を各初期データに持たせました
 const DEFAULT_PERFORMANCES = [
-  { id: 1, troupeId: 'a', title: '春の嵐、それから', dateStart: '2026-06-14', dateEnd: '2026-06-16', venue: '早稲田大学小劇場', desc: '人間の孤独と繋がりをテーマにした現代演劇。' },
-  { id: 2, troupeId: 'b', title: '真夏の夜の夢', dateStart: '2026-06-05', dateEnd: '2026-06-08', venue: '慶應日吉協生館', desc: 'シェイクスピアの名作を現代風ポップスに乗せてお届けするミュージカル。' },
-  { id: 3, troupeId: 'd', title: '検察官', dateStart: '2026-06-25', dateEnd: '2026-06-28', venue: '外部劇場', desc: '古典名作を鋭い視点で再解釈。' }
+  { id: 1, troupeId: 'a', title: '春の嵐、それから', dateStart: '2026-06-14', dateEnd: '2026-06-16', venue: '早稲田大学小劇場', desc: '人間の孤独と繋がりをテーマにした現代演劇。', maxQuota: 300 },
+  { id: 2, troupeId: 'b', title: '真夏の夜の夢', dateStart: '2026-06-05', dateEnd: '2026-06-08', venue: '慶應日吉協生館', desc: 'シェイクスピアの名作を現代風ポップスに乗せてお届けするミュージカル。', maxQuota: 200 },
+  { id: 3, troupeId: 'd', title: '検察官', dateStart: '2026-06-25', dateEnd: '2026-06-28', venue: '外部劇場', desc: '古典名作を鋭い視点で再解釈。', maxQuota: 400 }
 ];
 
+// 💡 どの公演（perfId）に対する依頼かを紐付けられるように修正
 const DEFAULT_REQUESTS = [
-  { id: 101, toTroupeId: 'a', fromTroupe: 'ステージクロス', copies: 100, date: '2026/06/01', preview: 'A4ペラ / 定期公演のビラ折り込みをお願いします。', status: 'pending' }
+  { id: 101, toTroupeId: 'a', perfId: 1, fromTroupe: 'ステージクロス', copies: 126, date: '2026/06/01', preview: 'A4ペラ / 定期公演のビラ折り込みをお願いします。', status: 'pending' }
 ];
 
-let troupesData = JSON.parse(localStorage.getItem('troupesData_v3')) || DEFAULT_TROUPES;
-let performancesData = JSON.parse(localStorage.getItem('performancesData_v3')) || DEFAULT_PERFORMANCES;
-let incomingRequests = JSON.parse(localStorage.getItem('incomingRequests_v3')) || DEFAULT_REQUESTS;
-let currentUser = JSON.parse(localStorage.getItem('currentUser_v3')) || null;
+let troupesData = JSON.parse(localStorage.getItem('troupesData_v4')) || DEFAULT_TROUPES;
+let performancesData = JSON.parse(localStorage.getItem('performancesData_v4')) || DEFAULT_PERFORMANCES;
+let incomingRequests = JSON.parse(localStorage.getItem('incomingRequests_v4')) || DEFAULT_REQUESTS;
+let currentUser = JSON.parse(localStorage.getItem('currentUser_v4')) || null;
 
 function saveAllData() {
-  localStorage.setItem('troupesData_v3', JSON.stringify(troupesData));
-  localStorage.setItem('performancesData_v3', JSON.stringify(performancesData));
-  localStorage.setItem('incomingRequests_v3', JSON.stringify(incomingRequests));
-  localStorage.setItem('currentUser_v3', JSON.stringify(currentUser));
+  localStorage.setItem('troupesData_v4', JSON.stringify(troupesData));
+  localStorage.setItem('performancesData_v4', JSON.stringify(performancesData));
+  localStorage.setItem('incomingRequests_v4', JSON.stringify(incomingRequests));
+  localStorage.setItem('currentUser_v4', JSON.stringify(currentUser));
 }
 
 let currentYear = 2026;
@@ -672,15 +680,20 @@ function renderDashboardInbox() {
 
   if (!currentUser) return;
 
-  const myRequests = incomingRequests.filter(r => r.toTroupeId === currentUser.id && r.status === 'pending');
-  document.getElementById('stat-incoming-count').innerText = `${myRequests.length} 件`;
+  const myRequests = incomingRequests.filter(r => r.toTroupeId === currentUser.id);
+  const pendingRequests = myRequests.filter(r => r.status === 'pending');
+  
+  document.getElementById('stat-incoming-count').innerText = `${pendingRequests.length} 件`;
+  
+  const totalCopies = myRequests.reduce((sum, r) => sum + r.copies, 0);
+  document.getElementById('stat-total-requested').innerText = `${totalCopies} 部`;
 
-  if (myRequests.length === 0) {
+  if (pendingRequests.length === 0) {
     container.innerHTML = `<div class="empty-state"><i class="ti ti-mail"></i>あなた宛ての未処理の依頼はありません。</div>`;
     return;
   }
 
-  myRequests.forEach(r => {
+  pendingRequests.forEach(r => {
     const item = document.createElement('div');
     item.className = 'inbox-item unread';
     item.innerHTML = `
@@ -786,18 +799,49 @@ function renderCalendar() {
   }
 }
 
+// 💡 公演ごとに「設定された上限枠」と「現在の使用数」を動的に集計して表示
 function openPerformanceDetail(id) {
   selectedPerfId = id;
   const perf = performancesData.find(p => p.id === id);
   if (!perf) return;
   const troupe = troupesData.find(t => t.id === perf.troupeId);
 
+  // 公演情報書き換え
   document.getElementById('detail-troupe-name').innerText = troupe ? troupe.name : '不明な劇団';
   document.getElementById('detail-title').innerText = perf.title;
   document.getElementById('detail-desc').innerText = perf.desc || '公演概要は登録されていません。';
   document.getElementById('detail-date').innerText = `${perf.dateStart} 〜 ${perf.dateEnd}`;
   document.getElementById('detail-venue').innerText = perf.venue;
   document.getElementById('detail-email').innerText = troupe ? troupe.email : '不明';
+
+  // 💡 【機能拡張】この公演に届いている依頼部数の合計を計算
+  const maxQuota = perf.maxQuota || 300; // 旧データ救済措置として未設定は300
+  const usedQuota = incomingRequests
+    .filter(r => r.perfId === id)
+    .reduce((sum, r) => sum + r.copies, 0);
+
+  // 右側サイドバーのメーターを動的更新
+  document.getElementById('detail-max-quota').innerHTML = `${maxQuota}<span style="font-size:14px;font-weight:400;color:var(--muted)"> 部</span>`;
+  document.getElementById('detail-quota-summary').innerText = `${usedQuota} / ${maxQuota}部 使用済み`;
+  
+  // バーの長さ計算
+  const percentage = Math.min(100, Math.floor((usedQuota / maxQuota) * 100));
+  document.getElementById('detail-quota-bar').style.width = `${percentage}%`;
+
+  // 満杯ならバッジとボタンを変更
+  const badge = document.getElementById('detail-status-badge');
+  const reqBtn = document.getElementById('detail-request-btn');
+  if (usedQuota >= maxQuota) {
+    badge.innerText = '満員御礼・締切';
+    badge.className = 'status-badge status-closed';
+    reqBtn.innerText = '受付上限に達しました';
+    reqBtn.disabled = true;
+  } else {
+    badge.innerText = '折り込み受付中';
+    badge.className = 'status-badge status-open';
+    reqBtn.innerText = '折り込みを依頼する';
+    reqBtn.disabled = false;
+  }
 
   showPage('perf-detail');
 }
@@ -862,22 +906,25 @@ function handleRegisterPerformance() {
   const end = document.getElementById('new-perf-end').value;
   const venue = document.getElementById('new-perf-venue').value;
   const desc = document.getElementById('new-perf-desc').value;
+  // 💡 入力された上限部数を取得
+  const quota = parseInt(document.getElementById('new-perf-quota').value) || 300;
 
   if (!title || !venue) { alert('タイトルと会場名は必須です！'); return; }
 
-  performancesData.push({ id: Date.now(), troupeId: currentUser.id, title, dateStart: start, dateEnd: end, venue, desc });
+  // 💡 maxQuota プロパティを持たせて保存
+  performancesData.push({ id: Date.now(), troupeId: currentUser.id, title, dateStart: start, dateEnd: end, venue, desc, maxQuota: quota });
   saveAllData();
 
   const targetDate = new Date(start);
   currentYear = targetDate.getFullYear();
   currentMonth = targetDate.getMonth();
 
-  alert(`劇団「${currentUser.name}」の公演を登録しました！`);
+  alert(`劇団「${currentUser.name}」の公演「${title}」（上限：${quota}部）を登録しました！`);
   showPage('calendar');
 }
 
 // ==========================================
-// 6. 本物の折り込み依頼送信 (ご指定のIDに修正済み)
+// 6. 折り込み依頼送信 (Service ID & Template ID 適用済み)
 // ==========================================
 function updateRequestFormUI() {
   const perf = performancesData.find(p => p.id === selectedPerfId);
@@ -901,25 +948,34 @@ function submitRequestForm() {
 
   const fromName = document.getElementById('req-from-name').value;
   const fromEmail = document.getElementById('req-from-email').value;
-  const copies = document.getElementById('req-copies').value;
+  const copies = parseInt(document.getElementById('req-copies').value);
   const size = document.getElementById('req-size').value;
   const notes = document.getElementById('req-notes').value;
 
   if (!fromName || !fromEmail || !copies) { alert('必須項目を入力してください。'); return; }
 
-  // 内部データベースへの登録
+  // 💡 【残数制限チェック】残り枠を超える依頼はストップする
+  const maxQuota = perf.maxQuota || 300;
+  const usedQuota = incomingRequests.filter(r => r.perfId === selectedPerfId).reduce((sum, r) => sum + r.copies, 0);
+  if (usedQuota + copies > maxQuota) {
+    alert(`申し訳ありません。この公演の残り受付枠はあと ${maxQuota - usedQuota} 部のため、${copies} 部の依頼は承れません。`);
+    return;
+  }
+
+  // 内部データベースへの登録（perfIdをしっかり付与）
   incomingRequests.push({
     id: Date.now(),
     toTroupeId: targetTroupe.id,
+    perfId: selectedPerfId,
     fromTroupe: fromName,
-    copies: parseInt(copies),
+    copies: copies,
     date: '2026/06/01',
     preview: `${size} / ${notes || '備考なし'}`,
     status: 'pending'
   });
   saveAllData();
 
-  // メール送信用パラメータの組み立て
+  // メール送信用パラメータ
   const templateParams = {
     to_email: targetTroupe.email,      
     from_name: fromName,
@@ -929,19 +985,18 @@ function submitRequestForm() {
     notes: notes || '特になし'
   };
 
-  // ユーザー様ご指定のService ID & Template IDをセット
   const serviceID = 'service_4gfx3qf';  
   const templateID = 'template_rzattmh'; 
 
-  // EmailJSでの送信実行
+  // EmailJS送信
   emailjs.send(serviceID, templateID, templateParams)
     .then(function(response) {
        console.log('SUCCESS!', response.status, response.text);
-       alert(`【本物のメール送信成功！】\n相手劇団（${targetTroupe.name}）の登録アドレス「${targetTroupe.email}」へ通知を送信しました！`);
+       alert(`【メール送信成功】\n相手劇団（${targetTroupe.name}）へ通知を送信しました！`);
        finalizeRequestFormSuccess();
     }, function(error) {
        console.log('FAILED...', error);
-       alert('EmailJSの送信に失敗しました。キーやテンプレート変数の設定をご確認ください。 \nエラー内容: ' + JSON.stringify(error));
+       alert('EmailJSの送信に失敗しました。\nエラー内容: ' + JSON.stringify(error));
     });
 }
 
@@ -954,7 +1009,9 @@ function finalizeRequestFormSuccess() {
   setTimeout(() => {
     if (banner) banner.classList.remove('show');
     if (formBody) formBody.style.display = 'block';
-    showPage('calendar');
+    
+    // 再度詳細ページを開き直して最新メーター状態にする
+    openPerformanceDetail(selectedPerfId);
   }, 2500);
 }
 
