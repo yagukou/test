@@ -41,76 +41,116 @@
     input, select, textarea { font-family: inherit; }
 
     /* ===================== NAV ===================== */
+/* ===================== NEW NAV (Modern Minimal) ===================== */
     .nav {
-      background: var(--crimson);
-      padding: 0 1.5rem;
+      background: var(--white);
+      padding: 0 2rem;
       display: flex;
       align-items: center;
-      gap: 0;
-      border-bottom: 3px solid var(--gold);
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(26, 20, 16, 0.06); /* ソフトな影で今っぽさを演出 */
       position: sticky;
       top: 0;
       z-index: 100;
+      height: 64px; /* 高さを固定して安定感を出す */
     }
     .nav-logo {
-      font-size: 15px;
-      font-weight: 500;
-      color: #fff;
-      letter-spacing: 0.05em;
-      padding: 14px 0;
-      margin-right: 2rem;
-      white-space: nowrap;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.03em;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
-    .nav-logo span { color: var(--gold-light); font-weight: 400; }
-    .nav-tabs { display: flex; gap: 0; flex: 1; }
+    .nav-logo i {
+      color: var(--crimson); /* ロゴのアイコンだけにアクセントカラーを使用 */
+      font-size: 18px;
+    }
+    .nav-logo span {
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--surface2);
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 4px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px; /* タブ同士に隙間をあける */
+      align-items: center;
+      margin: 0 2rem;
+    }
     .nav-tab {
-      padding: 14px 16px;
+      padding: 8px 16px;
       font-size: 13px;
-      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      color: var(--muted);
       cursor: pointer;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -3px;
-      transition: all 0.15s;
-      white-space: nowrap;
+      border-radius: 20px; /* カプセル型にする */
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       gap: 6px;
-      border-top: none;
-      border-left: none;
-      border-right: none;
+      border: none;
       background: none;
     }
-    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.07); }
-    .nav-tab.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
-    .nav-tab i { font-size: 15px; }
-    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .nav-tab:hover {
+      color: var(--ink);
+      background: var(--surface2);
+    }
+    /* アクティブ時はシックなダークトーンの座布団を敷く（パクリ感を消すコア部分） */
+    .nav-tab.active {
+      color: var(--white);
+      background: var(--ink-mid);
+    }
+    .nav-tab i {
+      font-size: 16px;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     .nav-btn {
-      padding: 6px 14px;
+      padding: 8px 16px;
       font-size: 12px;
-      border-radius: var(--radius-sm);
+      font-weight: 500;
+      border-radius: var(--radius-md);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.15s;
+      gap: 6px;
+      transition: all 0.2s ease;
+      height: 36px;
     }
     .nav-btn-outline {
-      border: 1px solid rgba(255,255,255,0.35);
-      color: #fff;
-      background: transparent;
+      border: 1px solid var(--border-neutral);
+      color: var(--ink-mid);
+      background: var(--white);
     }
-    .nav-btn-outline:hover { background: rgba(255,255,255,0.12); }
+    .nav-btn-outline:hover {
+      background: var(--surface2);
+      border-color: var(--muted);
+    }
     .nav-btn-primary {
-      border: 1px solid var(--gold);
-      background: var(--gold);
-      color: var(--ink);
-      font-weight: 500;
+      border: none;
+      background: var(--crimson);
+      color: var(--white);
     }
-    .nav-btn-primary:hover { background: var(--gold-light); }
-    .notif-badge { background: var(--crimson-light); color: white; padding: 1px 5px; border-radius: 10px; font-size: 10px; margin-left: 3px; }
+    .nav-btn-primary:hover {
+      background: var(--crimson-light);
+      transform: translateY(-1px); /* ボタンに少し動きをつける */
+    }
+    .notif-badge {
+      background: var(--crimson);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+    }
 
     /* ===================== LAYOUT ===================== */
     .page { display: none; padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; }
@@ -242,21 +282,33 @@
 
   <nav class="nav">
     <div class="nav-logo">
-      <i class="ti ti-ticket"></i> ビラネットワーク <span>早慶演劇祭</span>
+      <i class="ti ti-ticket"></i>ビラネットワーク <span>早慶演劇祭</span>
     </div>
+    
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showPage('calendar')" id="tab-calendar"><i class="ti ti-calendar"></i>カレンダー</button>
-      <button class="nav-tab" onclick="showPage('troupes')" id="tab-troupes"><i class="ti ti-users"></i>劇団一覧</button>
-      <button class="nav-tab" onclick="showPage('mypage')" id="tab-mypage"><i class="ti ti-layout-dashboard"></i>マイページ</button>
-      <button class="nav-tab" onclick="showPage('register')" id="tab-register"><i class="ti ti-plus"></i>公演登録</button>
-      <button class="nav-tab" onclick="showPage('help')" id="tab-help"><i class="ti ti-info-circle"></i>使い方</button>
+      <button class="nav-tab active" onclick="showPage('calendar')" id="tab-calendar">
+        <i class="ti ti-calendar"></i>カレンダー
+      </button>
+      <button class="nav-tab" onclick="showPage('troupes')" id="tab-troupes">
+        <i class="ti ti-users"></i>劇団一覧
+      </button>
+      <button class="nav-tab" onclick="showPage('mypage')" id="tab-mypage">
+        <i class="ti ti-layout-dashboard"></i>マイページ
+      </button>
+      <button class="nav-tab" onclick="showPage('register')" id="tab-register">
+        <i class="ti ti-plus"></i>公演登録
+      </button>
+      <button class="nav-tab" onclick="showPage('help')" id="tab-help">
+        <i class="ti ti-info-circle"></i>使い方
+      </button>
     </div>
+    
     <div class="nav-right">
       <button class="nav-btn nav-btn-outline">
-        <i class="ti ti-bell" style="font-size:13px"></i>通知 <span class="notif-badge">2</span>
+        <i class="ti ti-bell"></i>通知 <span class="notif-badge">2</span>
       </button>
       <button class="nav-btn nav-btn-primary" onclick="showPage('mypage')" id="nav-login-btn">
-        <i class="ti ti-user" style="font-size:13px"></i>ログイン
+        <i class="ti ti-user"></i>ログイン
       </button>
     </div>
   </nav>
