@@ -997,8 +997,10 @@
 // 1. データの定義（初期モックデータ）
 // ==========================================
 // ==========================================
+// ==========================================
 // 1. データの定義（初期モックデータ）
 // ==========================================
+// ★すべての初期データを「2026年」に統一しました
 const DEFAULT_TROUPES = [
   { id: 'a', name: '劇団ソウル', univ: '早稲田大学', est: '2018年', count: '12公演', accept: true, tags: ['現代演劇', '学生劇団'], cls: 'troupe-a', statusText: '折り込み受付中', statusCls: 'status-open', email: 'soul.member@example.com' },
   { id: 'b', name: 'ステージクロス', univ: '慶應義塾大学', est: '2015年', count: '24公演', accept: true, tags: ['ミュージカル', 'エンタメ'], cls: 'troupe-b', statusText: '折り込み受付中', statusCls: 'status-open', email: 'cross@example.com' },
@@ -1008,9 +1010,9 @@ const DEFAULT_TROUPES = [
 ];
 
 const DEFAULT_PERFORMANCES = [
-  { id: 1, troupeId: 'a', title: '春の嵐、それから', dateStart: '2025-06-14', dateEnd: '2025-06-16', venue: '早稲田大学小劇場', desc: '人間の孤独と繋がりをテーマにした現代演劇。早慶の枠を超えた演劇の可能性を追求した意欲作です。' },
-  { id: 2, troupeId: 'b', title: '真夏の夜の夢', dateStart: '2025-06-05', dateEnd: '2025-06-08', venue: '慶應日吉協生館', desc: 'シェイクスピアの名作を現代風ポップスに乗せてお届けする、躍動感あふれるミュージカルステージ。' },
-  { id: 3, troupeId: 'd', title: '検察官', dateStart: '2025-06-25', dateEnd: '2025-06-28', venue: '外部劇場', desc: '古典名作を鋭い視点で再解釈。人間の滑稽さと社会の縮図を描き出す、緊迫のシチュエーション劇。' }
+  { id: 1, troupeId: 'a', title: '春の嵐、それから', dateStart: '2026-06-14', dateEnd: '2026-06-16', venue: '早稲田大学小劇場', desc: '人間の孤独と繋がりをテーマにした現代演劇。早慶の枠を超えた演劇の可能性を追求した意欲作です。' },
+  { id: 2, troupeId: 'b', title: '真夏の夜の夢', dateStart: '2026-06-05', dateEnd: '2026-06-08', venue: '慶應日吉協生館', desc: 'シェイクスピアの名作を現代風ポップスに乗せてお届けする、躍動感あふれるミュージカルステージ。' },
+  { id: 3, troupeId: 'd', title: '検察官', dateStart: '2026-06-25', dateEnd: '2026-06-28', venue: '外部劇場', desc: '古典名作を鋭い視点で再解釈。人間の滑稽さと社会の縮図を描き出す、緊迫のシチュエーション劇。' }
 ];
 
 const DEFAULT_REQUESTS = [
@@ -1033,7 +1035,8 @@ function saveAllData() {
 // ==========================================
 // 2. グローバル状態管理
 // ==========================================
-let currentYear = 2025;
+// ★カレンダーの初期表示も「2026年6月」に合わせました
+let currentYear = 2026;
 let currentMonth = 5; // 6月 (0始まり)
 let pageHistory = ['calendar'];
 let currentUser = null; 
@@ -1224,13 +1227,13 @@ function handleRegisterAccount() {
   troupesData.push(newTroupe);
   currentUser = newTroupe;
 
-  saveAllData(); // ★ローカルストレージに保存
+  saveAllData(); 
   simulateSendEmail(email, '【ビラネットワーク】団体アカウント作成完了', `${name} 様\nアカウント作成が完了しました。管理マイページが利用可能です。`);
   updateAuthUI();
 }
 
 function handleLogin() {
-  currentUser = troupesData[0]; // デモ用に「劇団ソウル」としてログイン
+  currentUser = troupesData[0]; 
   updateAuthUI();
 }
 
@@ -1294,7 +1297,7 @@ function respondRequest(id, action) {
   if (!r) return;
   r.status = action;
 
-  saveAllData(); // ★ローカルストレージに保存
+  saveAllData(); 
 
   const resultText = action === 'approve' ? '【承認】' : '【見送り】';
   simulateSendEmail('applicant@example.com', `折り込み依頼の結果通知（${resultText}）`, `${r.fromTroupe} 御中\nご依頼いただいたビラ折り込みの件、結果は${resultText}となりました。`);
@@ -1311,10 +1314,15 @@ function handleRegisterPerformance() {
 
   if (!title || !venue) { alert('タイトルと会場名を入力してください'); return; }
 
+  // データを保存
   performancesData.push({ id: Date.now(), troupeId: 'a', title, dateStart: start, dateEnd: end, venue, desc });
+  saveAllData(); 
   
-  saveAllData(); // ★ローカルストレージに保存
-  
+  // 入力された日付の「年」と「月」を解析してカレンダーを自動でその月に切り替える
+  const targetDate = new Date(start);
+  currentYear = targetDate.getFullYear();
+  currentMonth = targetDate.getMonth();
+
   alert('カレンダーに新公演を登録しました！');
   showPage('calendar');
 }
@@ -1342,7 +1350,7 @@ function submitRequestForm() {
     status: 'pending'
   });
 
-  saveAllData(); // ★ローカルストレージに保存
+  saveAllData(); 
 
   simulateSendEmail(
     'soul.member@example.com',
