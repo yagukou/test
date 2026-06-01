@@ -571,7 +571,10 @@ body {
           <div class="info-banner-title" id="welcome-message"></div>
           <p id="account-status-info"></p>
         </div>
-        <button class="btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="handleLogout()">ログアウト</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="handleLogout()">ログアウト</button>
+          <button class="btn-ghost" style="padding: 6px 12px; font-size: 12px; color: #A32D2D; border-color: #A32D2D;" onclick="deleteTroupeAccount()">アカウント削除</button>
+        </div>
       </div>
       <div class="stat-grid">
         <div class="stat-card stat-card-red">
@@ -1139,6 +1142,32 @@ function deleteSinglePerformance() {
     alert("公演予定を削除しました。");
     showPage('calendar'); // カレンダー画面に戻る
   }
+}
+
+// 劇団アカウントを削除する関数
+function deleteTroupeAccount() {
+  if (!currentUser) {
+    alert('ログインしていません。');
+    return;
+  }
+  
+  if (!confirm('本当にこの劇団アカウントを削除しますか？\n（この劇団が登録した公演情報も一緒に削除されます）')) {
+    return;
+  }
+
+  // 1. 劇団リストから削除
+  troupesData = troupesData.filter(t => t.id !== currentUser.id);
+  localStorage.setItem('troupesData_v4', JSON.stringify(troupesData));
+
+  // 2. その劇団が登録していた公演も連動して削除
+  performancesData = performancesData.filter(p => p.troupeId !== currentUser.id);
+  localStorage.setItem('performancesData_v4', JSON.stringify(performancesData));
+
+  // 3. ログイン状態をクリアして画面をリフレッシュ
+  localStorage.removeItem('currentUser_v4');
+  alert('劇団アカウントと関連する公演情報を削除しました。');
+  
+  location.reload(); // 画面をリロードして変更を即座に反映
 }
 
 // 初期起動
