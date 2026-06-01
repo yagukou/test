@@ -1118,65 +1118,57 @@ function deleteSinglePerformance() {
   }
 }
 
-// 💡 【追加】特定の「劇団」をデータから削除する関数
-// 💡 【セキュリティ強化版】特定の「公演」をデータから削除する関数
+// 🔒 【セキュリティ強化版】特定の「公演」をデータから削除する関数
 function deleteSinglePerformance() {
   if (!selectedPerfId) return;
   const perf = performancesData.find(p => p.id === selectedPerfId);
   if (!perf) return;
 
-  // 🔒 【セキュリティ追加】ログインしていない、または別の劇団の場合は拒否する
+  // 【セキュリティ】ログインしていない、または別の劇団の場合は拒否する
   if (!currentUser || currentUser.id !== perf.troupeId) {
     alert("❌ セキュリティエラー：この公演を削除する権限がありません。\n（公演を登録した劇団アカウントでログインしてください）");
     return;
   }
 
-  // 本人確認が取れた場合のみ、以下の削除処理が進む
   if (confirm(`公演「${perf.title}」をカレンダーから削除しますか？\n(この公演宛ての折り込み依頼データも一緒に削除されます)`)) {
-    // 1. 公演データを配列から除外
     performancesData = performancesData.filter(p => p.id !== selectedPerfId);
-    // 2. その公演に紐づいていた依頼データも一緒に掃除
     incomingRequests = incomingRequests.filter(r => r.perfId !== selectedPerfId);
     
-    saveAllData(); // ローカルストレージに保存
+    saveAllData(); 
     alert("公演予定を削除しました。");
-    showPage('calendar'); // カレンダー画面に戻る
+    showPage('calendar'); 
   }
 }
 
 // 劇団アカウントを削除する関数
-function deleteTroupeAccount() {
-  if (!currentUser) {
-    alert('ログインしていません。');
+function deleteSingleTroupe(event, id, name) {
+  // カード自体のクリックイベント（カレンダーへの画面遷移）が発火するのを防ぐ
+  event.stopPropagation();
+
+  // 【セキュリティ】ログインしていない、または別の劇団の場合は拒否
+  if (!currentUser || currentUser.id !== id) {
+    alert(`❌ セキュリティエラー：劇団「${name}」を削除する権限がありません。\n（この劇団のアカウントでログインしてから操作してください）`);
     return;
   }
-  
-  if (!confirm('本当にこの劇団アカウントを削除しますか？\n（この劇団が登録した公演情報も一緒に削除されます）')) {
-    return;
+
+  if (confirm(`本当に劇団「${name}」のアカウントを削除しますか？\n（この劇団が登録した公演情報や依頼も一緒に削除されます）`)) {
+    troupesData = troupesData.filter(t => t.id !== id);
+    performancesData = performancesData.filter(p => p.troupeId !== id);
+    incomingRequests = incomingRequests.filter(r => r.toTroupeId !== id);
+
+    currentUser = null; // 自分のアカウントを消したのでログアウト状態にする
+    saveAllData();
+    alert(`劇団「${name}」のデータをすべて削除しました。`);
+    
+    // UIの再描画
+    updateFilterDropdown();
+    renderLegend();
+    renderTroupes(troupesData);
+    updateAuthUI();
+    showPage('troupes'); 
   }
-
-  // 1. 劇団リストから削除
-  troupesData = troupesData.filter(t => t.id !== currentUser.id);
-  localStorage.setItem('troupesData_v4', JSON.stringify(troupesData));
-
-  // 2. その劇団が登録していた公演も連動して削除
-  performancesData = performancesData.filter(p => p.troupeId !== currentUser.id);
-  localStorage.setItem('performancesData_v4', JSON.stringify(performancesData));
-
-  // 3. ログイン状態をクリアして画面をリフレッシュ
-  localStorage.removeItem('currentUser_v4');
-  alert('劇団アカウントと関連する公演情報を削除しました。');
-  
-  location.reload(); // 画面をリロードして変更を即座に反映
 }
 
-// 初期起動
-document.addEventListener('DOMContentLoaded', () => {
-  updateFilterDropdown();
-  renderLegend();
-  renderCalendar();
-  updateAuthUI();
-});
 </script>
 </body>
 </html>
